@@ -25,16 +25,16 @@ urlpatterns = [
     path('api/public/', include('public_apps.api.urls')),
 
     # Auth API
-    path('api/auth/', include('tenant_apps.api.urls')),
+    path('', include('tenant_apps.api.urls')),
 
     # Catalog API (products, combos, menus)
-    path('api/catalog/', include('tenant_apps.catalog.urls')),
+    #path('api/catalog/', include('tenant_apps.catalog.urls')),
 
     # Orders API
-    path('api/orders/', include('tenant_apps.orders.urls')),
+    #path('api/orders/', include('tenant_apps.orders.urls')),
 
     # Business Clients API
-    path('api/business/', include('tenant_apps.business.urls')),
+    #path('api/business/', include('tenant_apps.business.urls')),
 
     # Billing API
     path('api/billing/', include('tenant_apps.billing.urls')),

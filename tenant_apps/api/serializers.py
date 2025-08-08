@@ -19,7 +19,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
 
-    def create(self, validated_data):
+    def create(self, validated_data, company=None):
         validated_data.pop('password2', None)
         password = validated_data.pop('password')
         email = validated_data.pop('email')
@@ -27,7 +27,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         # Remueve username si está en validated_data
         validated_data.pop('username', None)
 
-        user = User.objects.create_user(email=email, password=password, **validated_data)
+        user = User.objects.create_user(email=email,company=company, password=password, **validated_data)
         return user
         
 
@@ -42,3 +42,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             raise AuthenticationFailed("User does not belong to this tenant.")
 
         return data
+        
