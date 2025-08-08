@@ -1,0 +1,25 @@
+Create migrations for shared apps:
+
+bash
+Copiar
+Editar
+python manage.py makemigrations shared_core public_apps
+Migrate shared (public) schema:
+
+bash
+Copiar
+Editar
+python manage.py migrate_schemas --shared
+Create a tenant (one) for development — either via management command above or via admin:
+
+bash
+Copiar
+Editar
+python manage.py create_tenant --schema=testrestaurant --name="Test Restaurant" --domain=testrestaurant.localhost --admin-email=admin@test.com --admin-pass=pass
+# or run the create_tenant management command you added (syntax depends)
+Migrate tenant apps for all tenants:
+
+bash
+Copiar
+Editar
+python manage.py migrate_schemas --tenant
