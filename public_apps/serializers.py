@@ -36,3 +36,16 @@ class TenantCreateSerializer(serializers.Serializer):
                 company=company
             )
             return tenant
+
+
+
+class TenantListSerializer(serializers.ModelSerializer):
+    primary_domain = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Client
+        fields = ['id', 'name', 'schema_name', 'primary_domain']
+
+    def get_primary_domain(self, obj):
+        domain = Domain.objects.filter(tenant=obj, is_primary=True).first()
+        return domain.domain if domain else None

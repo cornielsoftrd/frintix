@@ -86,10 +86,11 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware',
+    "corsheaders.middleware.CorsMiddleware", #Cors headers Middleware
      
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-     "corsheaders.middleware.CorsMiddleware", #Cors headers Middleware
+     
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -103,9 +104,17 @@ MIDDLEWARE = [
      #this way if we paste the header with the tenant tha has the produch the frontend will know the corrent tenant url
 ]
 
-CORS_ALLOWED_ORIGINS = [
+'''CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  #  frontend
+]'''
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "x-tenant-schema",  # <--- your custom header
 ]
+
 
 ROOT_URLCONF = 'frintix.urls'
 
