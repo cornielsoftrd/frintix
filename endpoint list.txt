@@ -1,0 +1,69 @@
+Endpoints actuales
+Auth / Registro / Login
+api/auth/register/
+Registrar usuario (employee, business_admin, restaurant_admin, retail_customer)
+
+api/auth/login/
+Login (JWT token obtain)
+
+api/auth/token/refresh/
+Refrescar token JWT
+
+Business Clients (Empresas clientes - B2B)
+api/auth/business_clients/
+Listar y crear BusinessClients (empresas que compran al restaurante)
+
+api/auth/business_clients/{id}/
+Detalle, actualizar o eliminar BusinessClient
+
+Employees (Empleados de Business Clients)
+api/auth/employees/
+Listar y crear empleados
+
+api/auth/employees/{id}/
+Detalle, actualizar o eliminar empleado
+
+api/auth/employees/create/
+Endpoint específico para creación de empleados (si tienes la vista)
+
+Catalog (Productos, Combos, Menús)
+api/catalog/products/
+Listar y crear productos
+
+api/catalog/products/{id}/
+Detalle, actualizar, eliminar producto
+
+api/catalog/combos/
+Listar y crear combos
+
+api/catalog/combos/{id}/
+Detalle, actualizar, eliminar combo
+
+api/catalog/menus/
+Listar y crear menús
+
+api/catalog/menus/{id}/
+Detalle, actualizar, eliminar menú
+
+Orders (Pedidos)
+api/orders/
+Listar y crear pedidos
+
+api/orders/{id}/
+Detalle, actualizar, eliminar pedido
+
+api/orders/{id}/confirm_payment/ (POST)
+Confirmar pago de un pedido
+
+Retail Customers (Clientes finales sin empresa)
+api/retail_customer/register/
+Registro de cliente retail
+
+api/retail_customer/profile/
+CRUD perfil de cliente retail (vía ViewSet)
+
+Public / Tenant
+api/public/
+(si tienes algo público, aquí va)
+
+Tenant URLs (subdominios) para cada restaurante (configuración de django-tenants)

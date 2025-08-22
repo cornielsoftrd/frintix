@@ -1,6 +1,6 @@
 from django.urls import path
-from ..views import TenantSignupView
+from ..views import TenantCreateAPIView
 
 urlpatterns = [
-    path('signup/', TenantSignupView.as_view(), name='tenant-signup'),
+    path('signup/', TenantCreateAPIView.as_view(), name='tenant-signup'),
 ]

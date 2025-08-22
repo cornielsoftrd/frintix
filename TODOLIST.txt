@@ -1,0 +1,108 @@
+🔥 Perfect — now you have BusinessClient registration with users working. That’s a huge milestone!
+Let’s think about the next steps in your app roadmap so you can start connecting the pieces:
+
+✅ What You Have So Far
+
+Multi-tenancy with django-tenants:
+
+Each Restaurant (Company) is a tenant.
+
+Users & Roles in shared_core:
+
+restaurant_admin, employee, retail_customer.
+
+BusinessClient API:
+
+Can create BusinessClient + associated User.
+
+Orders API:
+
+Works for retail_customer and employee.
+
+🚀 Next Steps
+1. Employee Management (per BusinessClient)
+
+BusinessClients need to add their employees.
+
+Each Employee is a User with role "employee" and a relation to their BusinessClient.
+
+Add endpoints:
+
+POST /api/business-clients/{id}/employees/ → create employee
+
+GET /api/business-clients/{id}/employees/ → list employees
+
+Make sure only BusinessClient admin can manage them.
+
+2. BusinessClient Ordering Flow
+
+Right now:
+
+Orders require retail_customer or employee.
+
+Next:
+
+✅ Ensure employee orders are linked to their BusinessClient.
+
+When an employee places an order:
+
+Save order.business_client = employee.business_client
+
+This allows payroll or monthly billing later.
+
+3. Restaurant Catalog
+
+restaurant_admin should be able to create:
+
+Products
+
+Menus
+
+Combos
+
+Permissions must enforce:
+
+Only restaurant_admin inside their tenant can manage catalog.
+
+Employees/retail customers can only view.
+
+4. Order Management
+
+Extend the order flow:
+
+Employees place orders → linked to their BusinessClient.
+
+Retail customers place orders → linked only to themselves.
+
+Restaurant admins should see all orders for their tenant.
+
+BusinessClient admins should see all employee orders linked to them.
+
+5. Billing & Payroll
+
+Start designing billing logic:
+
+Retail orders → paid at checkout.
+
+Employee orders → billed to their BusinessClient.
+
+Later you can add:
+
+Monthly invoices for BusinessClients.
+
+Payroll deductions (if you integrate with HR/payroll systems).
+
+6. Polish Authentication
+
+Right now BusinessClient, Employee, and RetailCustomer register separately.
+
+Later, unify the flow:
+
+POST /api/auth/register with type = "restaurant_admin" | "business_client" | "retail_customer" | "employee"
+
+Assigns proper role and creates relationships.
+
+👉 So the immediate next step after creating BusinessClient should be:
+Build Employee management endpoints and make sure employee orders automatically link to their BusinessClient.
+
+Do you want me to sketch out the Employee API (models, serializers, views, permissions) so you can plug it in right after BusinessClient?

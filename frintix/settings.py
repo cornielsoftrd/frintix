@@ -37,27 +37,14 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-'''INSTALLED_APPS = [
-    # shared apps first
-    #'django_tenants',            # must be first
-    #'public_apps',               # Client, Domain (tenant registry)
-    #'shared_core',               # shared User (AUTH_USER_MODEL)
-    'rest_framework',
-    'rest_framework_simplejwt',
-    # tenant apps will be appended below...
-    # django contrib apps
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-]'''
-
 SHARED_APPS = [
     'django_tenants',       # mandatory
     'public_apps',          # tenant model (Client)
     'shared_core',          # shared User + possibly Company registry
+    'retail_customer',
+    'business',  # BusinessClient, Employee (per tenant)
+
+     "corsheaders",
     
     # keep django contrib in shared too:
     'django.contrib.contenttypes',
@@ -68,10 +55,11 @@ SHARED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular', #for api documentations
 ]
 
 TENANT_APPS = [
-    'tenant_apps.business',      # BusinessClient, Employee (per tenant)
+         
     'tenant_apps.catalog',  # Product, Menu, Combo
     'tenant_apps.orders',   # Order and payment logic
     'tenant_apps.billing',   # billing
@@ -82,26 +70,41 @@ INSTALLED_APPS = SHARED_APPS + TENANT_APPS
 
 # auth
 AUTH_USER_MODEL = 'shared_core.User'
+#PUBLIC_SCHEMA_URLCONF = 'public_urls'
 
 # djangorestframework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware',
+     
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+     "corsheaders.middleware.CorsMiddleware", #Cors headers Middleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "shared_core.middleware.TenantHeaderMiddleware", 
+     #middleware for passing the tenant schema to the front end so when need 
+     #to interact with something related to tenant the frontend could know which tenant
+     #this is because the frontend will always be in the base domain
+     #for example to make orders we cant make the order to localhost:8000/api/orders need to be to restauntante1.localhost:8000/api/orders
+     #this way if we paste the header with the tenant tha has the produch the frontend will know the corrent tenant url
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  #  frontend
 ]
 
 ROOT_URLCONF = 'frintix.urls'
@@ -187,7 +190,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+STATIC_LOCATION= "static/"
 STATIC_URL = 'static/'
+STATIC_ROOT= os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -195,3 +200,4 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CHANNEL_ALLOWED_ORIGINS = "http://localhost:3000"
+

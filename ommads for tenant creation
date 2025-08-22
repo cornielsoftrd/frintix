@@ -6,3 +6,10 @@ python manage.py create_tenant --schema=testrestaurant --name="Test Restaurant" 
 # or run the create_tenant management command you added (syntax depends)
 
 python manage.py migrate_schemas --tenant
+
+python manage.py create_tenant restaurante3 "Restaurante Uno" restaurante3.localhost
+
+python manage.py create_tenant_with_user public "localhost" localhost localhost@localhost.com caterin1993
+
+
+python manage.py makemigrations public_apps shared_core django_tenants public_apps shared_core orders billing business catalog 

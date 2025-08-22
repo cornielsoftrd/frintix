@@ -16,6 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.conf import settings
+from django.conf.urls.static import static
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 
 urlpatterns = [
@@ -24,22 +27,23 @@ urlpatterns = [
     # Public tenant registration, etc.
     path('api/public/', include('public_apps.api.urls')),
 
+    #business API
+    path('', include('business.urls')),
+
     # Auth API
     path('', include('tenant_apps.api.urls')),
 
-    # Catalog API (products, combos, menus)
-    #path('api/catalog/', include('tenant_apps.catalog.urls')),
 
-    # Orders API
-    #path('api/orders/', include('tenant_apps.orders.urls')),
+    path('api/retail/', include('retail_customer.urls')),
+    
 
-    # Business Clients API
-    #path('api/business/', include('tenant_apps.business.urls')),
-
-    # Billing API
-    path('api/billing/', include('tenant_apps.billing.urls')),
+    # Schema generation and docs with drf-spectacular
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    
 
  
-]
+] + static(settings.STATIC_URL,document_root=settings.STATIC_ROOT )
 
 

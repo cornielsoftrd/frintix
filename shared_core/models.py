@@ -2,9 +2,10 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
 class Company(models.Model):
-    """Represents a Restaurant in the public schema."""
-    name = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
+    """Restaurante registrado en la plataforma."""
+    name = models.CharField(max_length=255)
+    address = models.TextField(blank=True)
+    phone = models.CharField(max_length=20, blank=True)
 
     def __str__(self):
         return self.name
@@ -25,6 +26,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
         extra_fields.setdefault('is_active', True)
+        
         return self._create_user(email, password, company=company, **extra_fields)
 
     def create_superuser(self, email, password=None, company=None, **extra_fields):
@@ -39,13 +41,15 @@ class User(AbstractUser):
         ('restaurant_admin', 'Restaurant Admin'),
         ('business_admin', 'Business Admin'),
         ('employee', 'Employee'),
-        ('regularuser', 'regularuser'),
+        ('retail_customer', 'Retail Customer'),
     )
     username = models.CharField(max_length=150, unique=False, blank=True, null=True)  # obligatorio para AbstractUser
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     company = models.ForeignKey(Company, null=True, blank=True, on_delete=models.CASCADE)  # Solo restaurant_admin tiene company asignada
-
+    
+    is_businessadmin=models.BooleanField(default=False)
+    is_tenantadmin=models.BooleanField(default=False)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
