@@ -56,6 +56,7 @@ SHARED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular', #for api documentations
+    'django_filters',
 ]
 
 TENANT_APPS = [
@@ -205,6 +206,13 @@ STATIC_ROOT= os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+'''AUTHENTICATION_BACKENDS = [
+    "shared_core.backends.TenantAwareBackend",   # restricts login to the right tenant
+]'''
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

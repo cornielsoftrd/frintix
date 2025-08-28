@@ -43,11 +43,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             if user.business_client.name != current_tenant.name:
                 raise AuthenticationFailed("User does not belong to this tenant.")
             
-        # Add user info to the response
+        # Add user info to the response when login
         data['user'] = {
             "id": user.id,
             "email": user.email,
-            "name": user.get_full_name() or user.email,  # or username if you prefer
+            "name": user.get_full_name() or user.email,   
+            "role":user.role,
+
         }
 
         return data

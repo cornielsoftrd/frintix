@@ -6,75 +6,55 @@ from business.models import Employee
 from tenant_apps.catalog.models import Product, Combo, Menu
 from shared_core.models import Company
 from retail_customer.models import RetailCustomer
+import uuid #tis is to generate a uuid for the order id so we can make the order GET public for this model so anyone with the address can see the order 
 
 
 
+
+
+from django.db import models
+from business.models import BusinessClient, Employee
+from tenant_apps.catalog.models import Product, Combo, Menu
+from shared_core.models import Company
+from retail_customer.models import RetailCustomer
 
 
 class Order(models.Model):
-    PAYMENT_CHOICES = [
-        ('payroll', 'Payroll'),
-        ('cash', 'Cash'),
-        ('credit_card', 'Credit Card'),
-    ]
-
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('processing', 'Processing'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
+    PAYMENT_CHOICES = [
+        ('payroll', 'Payroll'),
+        ('cash', 'Cash'),
+        ('credit_card', 'Credit Card'),
+    ]
 
-    # Business client (only set if order is placed by an employee)
-    business_client = models.ForeignKey(
-        BusinessClient, 
-        on_delete=models.CASCADE, 
-        null=True, blank=True,
-        related_name="orders"
-    )
-
-    # who placed the order
-    employee = models.ForeignKey(
-        Employee, 
-        on_delete=models.CASCADE, 
-        null=True, blank=True,
-        related_name="orders"
-    )
-    retail_customer = models.ForeignKey(
-        RetailCustomer, 
-        on_delete=models.CASCADE, 
-        null=True, blank=True,
-        related_name="orders"
-    )
-
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True, related_name="orders")
+    business_client = models.ForeignKey(BusinessClient, on_delete=models.CASCADE, null=True, blank=True, related_name="orders")
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True, blank=True, related_name="orders")
+    retail_customer = models.ForeignKey(RetailCustomer, on_delete=models.CASCADE, null=True, blank=True, related_name="orders")
+    
+    
     delivery_address = models.TextField(blank=True, null=True)
-
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
-    combo = models.ForeignKey(Combo, on_delete=models.SET_NULL, null=True, blank=True)
-    menu = models.ForeignKey(Menu, on_delete=models.SET_NULL, null=True, blank=True)
-
-    quantity = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=1)  # optional, can remove
     payment_method = models.CharField(max_length=20, choices=PAYMENT_CHOICES, default='cash')
     is_paid = models.BooleanField(default=False)
-
+    is_paid_by_business = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     ordered_at = models.DateTimeField(auto_now_add=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     class Meta:
         ordering = ['-ordered_at']
 
     def __str__(self):
-        who = None
-        if self.employee:
-            who = self.employee.user.email
-        elif self.retail_customer:
-            who = self.retail_customer.user.email
-        else:
-            who = "Unknown"
-
-        item = self.product or self.combo or self.menu or "No item"
-        return f"Order #{self.id} by {who} - {item}"
-
+        who = self.employee.user.email if self.employee else \
+              self.retail_customer.user.email if self.retail_customer else "Unknown"
+        return f"Order #{self.id} by {who}"
 
 
 class OrderItem(models.Model):
@@ -84,5 +64,18 @@ class OrderItem(models.Model):
     menu = models.ForeignKey(Menu, on_delete=models.SET_NULL, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=1)
 
+    @property
+    def item_price(self):
+        if self.product:
+            return self.product.price * self.quantity
+        if self.combo:
+            return self.combo.price * self.quantity
+        if self.menu:
+            return self.menu.price * self.quantity
+    print(item_price)
+        
+
     def __str__(self):
         return f"Item {self.id} of Order {self.order.id}"
+
+   

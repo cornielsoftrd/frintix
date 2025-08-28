@@ -1,10 +1,14 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django_tenants.utils import schema_context
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
+from django.contrib.auth.models import AnonymousUser
 from .models import Order
 from .serializers import OrderSerializer
+
 
 class IsOrderOwnerOrAdmin(permissions.BasePermission):
     """Owner (employee/retail) or admin permission."""
@@ -14,13 +18,14 @@ class IsOrderOwnerOrAdmin(permissions.BasePermission):
             return True
         if hasattr(user, 'retailcustomer') and obj.retail_customer and obj.retail_customer.user == user:
             return True
-        if user.role in ['restaurant_admin', 'business_admin']:
+        if getattr(user, "role", None) in ['restaurant_admin', 'business_admin']:
             return True
         return False
 
-class OrderViewSet(viewsets.ModelViewSet):
+
+class OrderListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOrderOwnerOrAdmin]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -33,7 +38,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 return Order.objects.filter(employee__user=user)
             if hasattr(user, 'retailcustomer'):
                 return Order.objects.filter(retail_customer__user=user)
-            if user.role == 'restaurant_admin':
+            if getattr(user, "role", None) == 'restaurant_admin':
                 return Order.objects.all()
             return Order.objects.none()
 
@@ -44,16 +49,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("You must specify a tenant to place an order")
 
         with schema_context(tenant.schema_name):
-            # Ensure user is only ordering from one tenant at a time
-            existing_orders = Order.objects.filter(
-                employee__user=user if hasattr(user, 'employee') else None,
-                status='pending'
-            )
-            if existing_orders.exists():
-                first_order_tenant = existing_orders.first().business_client.company
-                if first_order_tenant != tenant.company:
-                    raise PermissionDenied("You can only place orders for one tenant at a time.")
-
             if hasattr(user, 'employee'):
                 employee = user.employee
                 business_client = employee.business_client
@@ -64,17 +59,52 @@ class OrderViewSet(viewsets.ModelViewSet):
             else:
                 serializer.save()
 
-    @action(detail=True, methods=['post'])
-    def confirm_payment(self, request, pk=None):
+
+class OrderDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = OrderSerializer
+    #permission_classes = [permissions.IsAuthenticated, IsOrderOwnerOrAdmin]
+    permission_classes = [IsAuthenticated]
+    lookup_field = "uuid"  # use UUID instead of pk
+
+    def get_queryset(self):
+        user = self.request.user
+        tenant = getattr(self.request, 'tenant', None)
+
+        # Return empty queryset if no tenant or user is anonymous
+        if not tenant or isinstance(user, AnonymousUser):
+            return Order.objects.none()
+
+        with schema_context(tenant.schema_name):
+            # Restaurant admin sees all orders
+            if getattr(user, "role", None) == 'restaurant_admin':
+                return Order.objects.all()
+
+            # Employees or retail customers see only their own orders
+            return Order.objects.filter(employee__user=user) | Order.objects.filter(retail_customer__user=user)
+
+
+class ConfirmPaymentAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsOrderOwnerOrAdmin]
+
+    def post(self, request, uuid):
         tenant = getattr(request, 'tenant', None)
         if not tenant:
             return Response({'detail': 'Tenant not set'}, status=status.HTTP_400_BAD_REQUEST)
 
         with schema_context(tenant.schema_name):
-            order = self.get_object()
+            try:
+                order = Order.objects.get(uuid=uuid)
+            except Order.DoesNotExist:
+                return Response({'detail': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            self.check_object_permissions(request, order)
+
             if order.is_paid:
                 return Response({'detail': 'Already paid'}, status=status.HTTP_400_BAD_REQUEST)
+
             order.is_paid = True
             order.status = 'processing'
             order.save()
-            return Response({'detail': 'Payment confirmed', 'order_id': order.id})
+            return Response({'detail': 'Payment confirmed', 'order_uuid': order.uuid})
+
+ 

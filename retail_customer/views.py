@@ -38,7 +38,10 @@ class RetailCustomerRegisterView(generics.CreateAPIView):
             "first_name": user.first_name,
             "last_name": user.last_name,
             "phone": retail_customer.phone,
-            "address": retail_customer.address,
+            "country": retail_customer.country,
+            "city": retail_customer.city,
+            "street": retail_customer.street,
+            "zip_code": retail_customer.zip_code,
             "payment_method": retail_customer.payment_method,
         }, status=status.HTTP_201_CREATED)
     

@@ -1,7 +1,14 @@
-from rest_framework.routers import DefaultRouter
-from .views import OrderViewSet
+from django.urls import path
+from .views import (
+    OrderListCreateAPIView,
+    OrderDetailAPIView,
+    ConfirmPaymentAPIView,
+   
+)
 
-router = DefaultRouter()
-router.register(r'', OrderViewSet, basename='order')
-
-urlpatterns = router.urls
+urlpatterns = [
+ 
+    path('api/orders/', OrderListCreateAPIView.as_view(), name='order-list-create'),
+    path('api/orders/<uuid:uuid>/', OrderDetailAPIView.as_view(), name='order-detail'),
+    path('api/orders/<uuid:uuid>/confirm-payment/', ConfirmPaymentAPIView.as_view(), name='order-confirm-payment'),
+]

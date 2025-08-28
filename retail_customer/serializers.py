@@ -6,7 +6,16 @@ class RetailCustomerSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = RetailCustomer
-        fields = '__all__'
+        fields = [
+            "user",
+            "phone",
+            "country",
+            "city",
+            "street",
+            "zip_code",
+            "payment_method",
+            "created_att"
+        ]
 
 
 class RetailCustomerRegisterSerializer(serializers.Serializer):
@@ -16,9 +25,15 @@ class RetailCustomerRegisterSerializer(serializers.Serializer):
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
     phone = serializers.CharField(required=False, allow_blank=True)
-    address = serializers.CharField(required=False, allow_blank=True)
+
+    # New structured fields for address
+    country = serializers.CharField(required=False, allow_blank=True)
+    city = serializers.CharField(required=False, allow_blank=True)
+    street = serializers.CharField(required=False, allow_blank=True)
+    zip_code = serializers.CharField(required=False, allow_blank=True)
+
     payment_method = serializers.ChoiceField(
-        choices=[('cash','Cash'),('credit_card','Credit Card'),('paypal','PayPal')],
+        choices=[('cash','Cash'),('credit_card','Credit Card')],
         default='cash'
     )
 
@@ -30,7 +45,10 @@ class RetailCustomerRegisterSerializer(serializers.Serializer):
     def create(self, validated_data):
         validated_data.pop('password2')
         phone = validated_data.pop('phone', None)
-        address = validated_data.pop('address', None)
+        country = validated_data.pop('country', '')
+        city = validated_data.pop('city', '')
+        street = validated_data.pop('street', '')
+        zip_code = validated_data.pop('zip_code', '')
         payment_method = validated_data.pop('payment_method', 'cash')
 
         user = User.objects.create_user(
@@ -44,7 +62,10 @@ class RetailCustomerRegisterSerializer(serializers.Serializer):
         retail_customer = RetailCustomer.objects.create(
             user=user,
             phone=phone,
-            address=address,
+            country=country,
+            city=city,
+            street=street,
+            zip_code=zip_code,
             payment_method=payment_method
         )
         return retail_customer

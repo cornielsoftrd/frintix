@@ -5,7 +5,8 @@ class Company(models.Model):
     """Restaurante registrado en la plataforma."""
     name = models.CharField(max_length=255)
     address = models.TextField(blank=True)
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(max_length=50, blank=True)
+    
 
     def __str__(self):
         return self.name
@@ -45,9 +46,9 @@ class User(AbstractUser):
     )
     username = models.CharField(max_length=150, unique=False, blank=True, null=True)  # obligatorio para AbstractUser
     email = models.EmailField(unique=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES)
     company = models.ForeignKey(Company, null=True, blank=True, on_delete=models.CASCADE)  # Solo restaurant_admin tiene company asignada
-    
+    created_att=models.DateTimeField(auto_now_add=True, blank=True, null=True)
     is_businessadmin=models.BooleanField(default=False)
     is_tenantadmin=models.BooleanField(default=False)
     USERNAME_FIELD = 'email'

@@ -5,7 +5,9 @@ from .views import (
     EmployeeListCreateView, 
     BusinessClientRegisterView,
     BusinessClientListCreateView,
-    BusinessClientDetailView
+    BusinessClientDetailView,
+    EmployeeExpensesView
+    
     )
 
 router = DefaultRouter()
@@ -13,9 +15,14 @@ router = DefaultRouter()
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('api/business/register', BusinessClientRegisterView.as_view(), name='register-bussinessCient'),
-    path('api/employees/create/', EmployeeListCreateView.as_view(), name='create-employee'),
+    path('api/business/register/', BusinessClientRegisterView.as_view(), name='register-bussinessCient'),
+    path('api/employees/', EmployeeListCreateView.as_view(), name='create-employee'),
      # Business Clients
     #path('api/business_clients/', BusinessClientListCreateView.as_view(), name='business-client-list-create'),
     path('api/business_clients/<int:pk>/', BusinessClientDetailView.as_view(), name='business-client-detail'),
+
+    #employee expenses
+    path('api/business/employee-expenses/', EmployeeExpensesView.as_view(), name='employee-expenses'),
+   
 ]
+ 

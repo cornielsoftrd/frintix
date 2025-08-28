@@ -29,26 +29,46 @@ class ProductViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied("Permission Denied, Tenant company not found.")
 
-
 # ---------- COMBO VIEWSET ----------
 class ComboViewSet(viewsets.ModelViewSet):
     serializer_class = ComboSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method in ["GET", "HEAD", "OPTIONS"]:
+            return [AllowAny()]  # public access
+        return [IsRestaurantAdminOfTenant()]
 
     def get_queryset(self):
-        return Combo.objects.filter(company=self.request.user.company)
+        tenant = getattr(self.request, "tenant", None)
+        if tenant and hasattr(tenant, "company"):
+            return Combo.objects.filter(company=tenant.company)
+        return Combo.objects.none()
 
     def perform_create(self, serializer):
-        serializer.save(company=self.request.user.company)
-
+        tenant = getattr(self.request, "tenant", None)
+        if tenant and hasattr(tenant, "company"):
+            serializer.save(company=tenant.company)
+        else:
+            raise PermissionDenied("Permission Denied, Tenant company not found.")
 
 # ---------- MENU VIEWSET ----------
 class MenuViewSet(viewsets.ModelViewSet):
     serializer_class = MenuSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.request.method in ["GET", "HEAD", "OPTIONS"]:
+            return [AllowAny()]
+        return [IsRestaurantAdminOfTenant()]
 
     def get_queryset(self):
-        return Menu.objects.filter(company=self.request.user.company)
+        tenant = getattr(self.request, "tenant", None)
+        if tenant and hasattr(tenant, "company"):
+            return Menu.objects.filter(company=tenant.company)
+        return Menu.objects.none()
 
     def perform_create(self, serializer):
-        serializer.save(company=self.request.user.company)
+        tenant = getattr(self.request, "tenant", None)
+        if tenant and hasattr(tenant, "company"):
+            serializer.save(company=tenant.company)
+        else:
+            raise PermissionDenied("Permission Denied, Tenant company not found.")

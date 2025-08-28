@@ -28,6 +28,8 @@ urlpatterns = [
 
     # Catalog, Orders, Billing etc. (como ya tienes)
     path('api/catalog/', include('tenant_apps.catalog.urls')),
-    path('api/orders/', include('tenant_apps.orders.urls')),
+    #orders api
+    path('', include('tenant_apps.orders.urls')),
+    
     path('api/billing/', include('tenant_apps.billing.urls')),
 ]

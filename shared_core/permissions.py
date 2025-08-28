@@ -1,29 +1,31 @@
 from rest_framework import permissions
  
     
+from rest_framework import permissions
+
 class IsBusinessAdmin(permissions.BasePermission):
-    message = "Only Busness admins of this Business can perform this action."
+    message = "Only business admins of this business can perform this action."
 
     def has_permission(self, request, view):
         user = request.user
-        
 
-        # Check user is authenticated, is restaurant_admin and belongs to tenant's company
+        # Must be authenticated
         if not user.is_authenticated:
             return False
 
-        if user.role != 'business_client':
+        # Must have the correct role
+        if getattr(user, "role", None) != "business_client":
             return False
- 
-        # user must be a business admin
-        if request.user.is_businessadmin != True:
+
+        # Must have the business admin flag
+        if not getattr(user, "is_businessadmin", False):
             return False
-        
-        if not hasattr(user, "business_client"):
-             return False
-        
-       
+
+        # Must be linked to a business client
+        if not hasattr(user, "business_client") or user.business_client is None:
+            return False
 
         return True
+
     
     
